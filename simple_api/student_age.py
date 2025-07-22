@@ -1,4 +1,3 @@
-#!flask/bin/python
 from flask import Flask, jsonify
 from flask import abort
 from flask import make_response
@@ -6,7 +5,6 @@ from flask import request
 from flask import url_for
 from flask_httpauth import HTTPBasicAuth
 from flask import g, session, redirect, url_for
-from flask_simpleldap import LDAP
 import json
 import os
 
@@ -25,11 +23,8 @@ def unauthorized():
     return make_response(jsonify({'error': 'Unauthorized access'}), 401)
 
 
-try:
-    student_age_file_path
-    student_age_file_path  = os.environ['student_age_file_path'] 
-except NameError:
-    student_age_file_path  = '/data/student_age.json'
+
+student_age_file_path  = './student_age.json'
 
 student_age_file = open(student_age_file_path, "r")
 student_age = json.load(student_age_file)
