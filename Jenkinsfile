@@ -20,6 +20,11 @@ pipeline {
                 }
             }
         },
+        stage('Test d\'intégration') {
+            steps {
+                sh 'python integration_test.py'
+            }
+        },
         stage('Deploy') {
             steps {
                 sh 'docker build -t devops .'
