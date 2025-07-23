@@ -7,34 +7,71 @@ pipeline {
             }
         },
         stage('Build') {
-            steps {
-                dir('website') {
-                    sh 'python3 -m venv env'
-                    sh '. env/Scripts/activate && pip install -r requirements.txt'
+            parallel {
+                stage('Build Website') {
+                    steps {
+                        dir('website') {
+                            sh 'python3 -m venv env'
+                            sh '. env/Scripts/activate && pip install -r requirements.txt'
+                        }
+                    }
+                }
+                stage('Build API') {
+                    steps {
+                        dir('simple_api') {
+                            sh 'python3 -m venv env'
+                            sh '. env/Scripts/activate && pip install -r requirements.txt'
+                        }
+                    }
                 }
             }
         },
         stage('Test') {
-            steps {
-                dir('website') {
-                    sh 'python -m unittest discover -s tests'
+            parallel {
+                stage('Test Website') {
+                    steps {
+                        dir('website') {
+                            sh 'python -m unittest discover -s tests'
+                        }
+                    }
+                }
+                stage('Test API') {
+                    steps {
+                        dir('simple_api') {
+                            sh '. env/Scripts/activate && python -m pytest tests/test_api.py --junitxml=api_report.xml'
+                        }
+                    }
                 }
             }
         },
         stage('Test d\'intégration') {
             steps {
-                sh '. env/Scripts/activate && pytest --junitxml=report.xml'
+                sh '. env/Scripts/activate && pytest --junitxml=integration_report.xml'
             }
         },
         stage('Deploy') {
-            steps {
-                sh 'docker build -t devops .'
-                sh 'docker run -d -p 80:80 devops'
+            parallel {
+                stage('Deploy Website') {
+                    steps {
+                        dir('website') {
+                            sh 'docker build -t devops-website .'
+                            sh 'docker run -d -p 80:80 devops-website'
+                        }
+                    }
+                }
+                stage('Deploy API') {
+                    steps {
+                        dir('simple_api') {
+                            sh 'docker build -t devops-api .'
+                            sh 'docker run -d -p 5000:5000 devops-api'
+                        }
+                    }
+                }
             }
         }
         stage('Rapport') {
             steps {
-                junit 'report.xml'
+                junit '**/report.xml, **/api_report.xml, **/integration_report.xml'
             }
         }
     }
