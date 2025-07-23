@@ -11,16 +11,16 @@ pipeline {
                 stage('Build Website') {
                     steps {
                         dir('website') {
-                            sh 'python3 -m venv env'
-                            sh '. env/Scripts/activate && pip install -r requirements.txt'
+                            bat 'python3 -m venv env'
+                            bat '. env/Scripts/activate && pip install -r requirements.txt'
                         }
                     }
                 }
                 stage('Build API') {
                     steps {
                         dir('simple_api') {
-                            sh 'python3 -m venv env'
-                            sh '. env/Scripts/activate && pip install -r requirements.txt'
+                            bat 'python3 -m venv env'
+                            bat '. env/Scripts/activate && pip install -r requirements.txt'
                         }
                     }
                 }
@@ -31,14 +31,14 @@ pipeline {
                 stage('Test Website') {
                     steps {
                         dir('website') {
-                            sh 'python -m unittest discover -s tests'
+                            bat 'python -m unittest discover -s tests'
                         }
                     }
                 }
                 stage('Test API') {
                     steps {
                         dir('simple_api') {
-                            sh '. env/Scripts/activate && python -m pytest tests/test_api.py --junitxml=api_report.xml'
+                            bat '. env/Scripts/activate && python -m pytest tests/test_api.py --junitxml=api_report.xml'
                         }
                     }
                 }
@@ -46,7 +46,7 @@ pipeline {
         },
         stage('Test d\'intégration') {
             steps {
-                sh '. env/Scripts/activate && pytest --junitxml=integration_report.xml'
+                bat '. env/Scripts/activate && pytest --junitxml=integration_report.xml'
             }
         },
         stage('Deploy') {
@@ -54,8 +54,8 @@ pipeline {
                 stage('Deploy Website') {
                     steps {
                         dir('website') {
-                            sh 'docker build -t devops-website .'
-                            sh 'docker run -d -p 80:80 devops-website'
+                            bat 'docker build -t devops-website .'
+                            bat 'docker run -d -p 80:80 devops-website'
                         }
                     }
                 }
